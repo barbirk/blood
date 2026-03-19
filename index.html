@@ -1627,18 +1627,100 @@
 
         function allowDrop(ev) {
             ev.preventDefault();
-            ev.target.closest('.drop-zone').classList.add('drag-over');
+            const zone = ev.target.closest('.drop-zone');
+            if (zone) zone.classList.add('drag-over');
         }
 
         function drag(ev) {
             ev.dataTransfer.setData('type', ev.target.dataset.type);
+            ev.target.style.opacity = '0.5';
         }
 
         function drop(ev) {
             ev.preventDefault();
             const zone = ev.target.closest('.drop-zone');
-            zone.classList.remove('drag-over');
+            if (zone) zone.classList.remove('drag-over');
             const type = ev.dataTransfer.getData('type');
+            const need = zone ? zone.dataset.need : null;
+            
+            // Reset opacity of all drag items
+            document.querySelectorAll('.drag-item').forEach(item => item.style.opacity = '1');
+            
+            if (type === need) {
+                zone.classList.add('correct');
+                zone.innerHTML = '✅';
+                checkScenarioComplete();
+            } else if (zone) {
+                zone.style.background = 'rgba(244, 67, 54, 0.3)';
+                setTimeout(() => zone.style.background = '', 500);
+            }
+        }
+
+        // Touch support for drag and drop on iPad
+        let draggedItem = null;
+        let touchOffset = { x: 0, y: 0 };
+        let dragGhost = null;
+
+        function initTouchDragDrop() {
+            const dragItems = document.querySelectorAll('#section-2 .drag-item');
+            const dropZones = document.querySelectorAll('#section-2 .drop-zone');
+
+            dragItems.forEach(item => {
+                // Enable touch dragging
+                item.addEventListener('touchstart', handleTouchStart, { passive: false });
+                item.addEventListener('touchmove', handleTouchMove, { passive: false });
+                item.addEventListener('touchend', handleTouchEnd, { passive: false });
+                
+                // Also enable click-to-select then click-to-drop
+                item.addEventListener('click', handleClickSelect);
+            });
+
+            dropZones.forEach(zone => {
+                zone.addEventListener('click', handleClickDrop);
+            });
+        }
+
+        function handleClickSelect(e) {
+            const item = e.currentTarget;
+            const alreadySelected = item.classList.contains('selected-drag');
+            
+            // Deselect all others
+            document.querySelectorAll('#section-2 .drag-item').forEach(i => {
+                i.classList.remove('selected-drag');
+                i.style.transform = '';
+                i.style.boxShadow = '';
+            });
+            
+            if (!alreadySelected) {
+                draggedItem = item;
+                item.classList.add('selected-drag');
+                item.style.transform = 'scale(1.1)';
+                item.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
+                
+                // Highlight drop zones
+                document.querySelectorAll('#section-2 .drop-zone').forEach(z => {
+                    if (!z.classList.contains('correct')) {
+                        z.style.borderColor = '#4caf50';
+                        z.style.background = 'rgba(76, 175, 80, 0.1)';
+                    }
+                });
+            } else {
+                draggedItem = null;
+                // Remove highlight
+                document.querySelectorAll('#section-2 .drop-zone').forEach(z => {
+                    if (!z.classList.contains('correct')) {
+                        z.style.borderColor = '';
+                        z.style.background = '';
+                    }
+                });
+            }
+        }
+
+        function handleClickDrop(e) {
+            const zone = e.currentTarget;
+            if (!draggedItem || zone.classList.contains('correct')) return;
+            
+            const type = draggedItem.dataset.type;
             const need = zone.dataset.need;
             
             if (type === need) {
@@ -1649,6 +1731,97 @@
                 zone.style.background = 'rgba(244, 67, 54, 0.3)';
                 setTimeout(() => zone.style.background = '', 500);
             }
+            
+            // Reset selection
+            draggedItem.classList.remove('selected-drag');
+            draggedItem.style.transform = '';
+            draggedItem.style.boxShadow = '';
+            draggedItem = null;
+            
+            // Remove highlight from all zones
+            document.querySelectorAll('#section-2 .drop-zone').forEach(z => {
+                if (!z.classList.contains('correct')) {
+                    z.style.borderColor = '';
+                    z.style.background = '';
+                }
+            });
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            draggedItem = e.currentTarget;
+            
+            const rect = draggedItem.getBoundingClientRect();
+            touchOffset.x = touch.clientX - rect.left;
+            touchOffset.y = touch.clientY - rect.top;
+            
+            // Create ghost element
+            dragGhost = draggedItem.cloneNode(true);
+            dragGhost.style.position = 'fixed';
+            dragGhost.style.width = rect.width + 'px';
+            dragGhost.style.height = rect.height + 'px';
+            dragGhost.style.zIndex = '1000';
+            dragGhost.style.opacity = '0.8';
+            dragGhost.style.pointerEvents = 'none';
+            dragGhost.style.left = (touch.clientX - touchOffset.x) + 'px';
+            dragGhost.style.top = (touch.clientY - touchOffset.y) + 'px';
+            document.body.appendChild(dragGhost);
+            
+            draggedItem.style.opacity = '0.3';
+        }
+
+        function handleTouchMove(e) {
+            if (!dragGhost) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            dragGhost.style.left = (touch.clientX - touchOffset.x) + 'px';
+            dragGhost.style.top = (touch.clientY - touchOffset.y) + 'px';
+            
+            // Highlight drop zone under finger
+            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            const zone = elementBelow ? elementBelow.closest('.drop-zone') : null;
+            
+            document.querySelectorAll('#section-2 .drop-zone').forEach(z => {
+                if (!z.classList.contains('correct')) z.classList.remove('drag-over');
+            });
+            
+            if (zone && !zone.classList.contains('correct')) {
+                zone.classList.add('drag-over');
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (!draggedItem || !dragGhost) return;
+            e.preventDefault();
+            
+            const touch = e.changedTouches[0];
+            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            const zone = elementBelow ? elementBelow.closest('.drop-zone') : null;
+            
+            if (zone && !zone.classList.contains('correct')) {
+                const type = draggedItem.dataset.type;
+                const need = zone.dataset.need;
+                
+                if (type === need) {
+                    zone.classList.add('correct');
+                    zone.innerHTML = '✅';
+                    checkScenarioComplete();
+                } else {
+                    zone.style.background = 'rgba(244, 67, 54, 0.3)';
+                    setTimeout(() => zone.style.background = '', 500);
+                }
+            }
+            
+            // Cleanup
+            document.body.removeChild(dragGhost);
+            draggedItem.style.opacity = '1';
+            draggedItem = null;
+            dragGhost = null;
+            
+            document.querySelectorAll('#section-2 .drop-zone').forEach(z => {
+                z.classList.remove('drag-over');
+            });
         }
         
         function checkScenarioComplete() {
@@ -1958,7 +2131,11 @@
         const finalCellQuestions = [
             { q: { en: 'Which cell DELIVERS OXYGEN?', fr: 'Quelle cellule LIVRE DE L\'OXYGÈNE ?' }, a: 'red' },
             { q: { en: 'Which cell FIGHTS GERMS?', fr: 'Quelle cellule COMBAT LES MICROBES ?' }, a: 'white' },
-            { q: { en: 'Which cell REPAIRS CUTS?', fr: 'Quelle cellule RÉPARE LES COUPURES ?' }, a: 'platelet' }
+            { q: { en: 'Which cell REPAIRS CUTS?', fr: 'Quelle cellule RÉPARE LES COUPURES ?' }, a: 'platelet' },
+            { q: { en: 'Which cell is the most numerous?', fr: 'Quelle cellule est la plus nombreuse ?' }, a: 'red' },
+            { q: { en: 'Which cell forms scabs?', fr: 'Quelle cellule forme les croûtes ?' }, a: 'platelet' },
+            { q: { en: 'Which cell is your personal army?', fr: 'Quelle cellule est ton armée personnelle ?' }, a: 'white' },
+            { q: { en: 'Which cell is like a delivery truck?', fr: 'Quelle cellule est comme un camion de livraison ?' }, a: 'red' }
         ];
         let currentCellQuestion = 0;
         
@@ -1971,7 +2148,7 @@
 
         function initFinalChallenge() {
             currentChallenge = 1;
-            currentCellQuestion = Math.floor(Math.random() * 3);
+            currentCellQuestion = Math.floor(Math.random() * finalCellQuestions.length);
             currentCompatQuestion = 0;
             
             document.getElementById('challenge1').style.display = 'block';
@@ -2154,6 +2331,7 @@
         const originalShowSection = showSection;
         showSection = function(index) {
             originalShowSection(index);
+            if (index === 2) initTouchDragDrop();
             if (index === 4) initKeysGame();
             if (index === 8) initHospital();
             if (index === 11) initFinalChallenge();
