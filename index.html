@@ -1352,14 +1352,9 @@
             currentLang = lang;
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelector('.lang-btn.' + lang).classList.add('active');
-            const elements = document.querySelectorAll('[data-en]');
-            console.log('[setLanguage] Found', elements.length, 'elements to update');
-            elements.forEach(el => {
+            document.querySelectorAll('[data-en]').forEach(el => {
                 const text = el.getAttribute('data-' + lang);
-                if (text) {
-                    console.log('[setLanguage] Updating:', el.tagName, '-', text.substring(0, 30) + '...');
-                    el.textContent = text;
-                }
+                if (text) el.textContent = text;
             });
             
             // Reinitialize modules with new language
