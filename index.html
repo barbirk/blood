@@ -1482,12 +1482,13 @@
                 top: ${Math.random() * maxY}px;
                 box-shadow: 2px 2px 5px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.3);
                 cursor: pointer;
+                pointer-events: auto;
                 -webkit-tap-highlight-color: rgba(0,0,0,0.2);
                 transition: transform 0.2s ease-out;
                 z-index: ${zIndex};
             `;
             cell.setAttribute('role', 'button');
-            cell.setAttribute('aria-label', labelObj[currentLang]);
+            cell.setAttribute('aria-label', labelObj[currentLang] || labelObj.en || 'Blood cell');
             
             // Create tooltip
             const tooltipEl = document.createElement('div');
