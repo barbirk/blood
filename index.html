@@ -1520,7 +1520,7 @@
             
             // Touch-friendly CSS
             cell.style.touchAction = 'none';
-            cell.style.webkitTapHighlightColor = 'transparent';
+            cell.style.webkitTapHighlightColor = 'rgba(0,0,0,0.2)';
             
             let isShowing = false;
             let hideTimeout = null;
@@ -1532,6 +1532,7 @@
                 cell.style.transform = 'scale(1.5)';
                 cell.style.zIndex = '100';
                 tooltipEl.style.opacity = '1';
+                console.log('[BloodDrop] Tooltip shown for', labelObj[currentLang]);
             };
             
             // Hide tooltip
@@ -1540,22 +1541,34 @@
                 cell.style.transform = 'scale(1)';
                 cell.style.zIndex = zIndex;
                 tooltipEl.style.opacity = '0';
+                console.log('[BloodDrop] Tooltip hidden');
             };
             
             // Mouse events (desktop hover)
             cell.onmouseenter = showTooltip;
             cell.onmouseleave = hideTooltip;
             
-            // Simple click handler - toggles on click/tap
-            cell.onclick = (e) => {
+            // Touch events (iOS/Android)
+            cell.addEventListener('touchstart', function(e) {
+                console.log('[BloodDrop] touchstart');
+                e.preventDefault();
+                showTooltip();
+            }, {passive: false});
+            
+            cell.addEventListener('touchend', function(e) {
+                console.log('[BloodDrop] touchend');
+                e.preventDefault();
+                hideTimeout = setTimeout(hideTooltip, 2000);
+            }, {passive: false});
+            
+            // Click fallback
+            cell.onclick = function(e) {
+                console.log('[BloodDrop] click');
                 e.stopPropagation();
-                if (hideTimeout) clearTimeout(hideTimeout);
-                
                 if (isShowing) {
                     hideTooltip();
                 } else {
                     showTooltip();
-                    // Auto-hide after 3 seconds on touch
                     hideTimeout = setTimeout(hideTooltip, 3000);
                 }
             };
