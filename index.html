@@ -1514,15 +1514,17 @@
                 tooltipEl.textContent = labelObj[currentLang];
             };
             
-            // Add touch-action CSS to prevent scrolling when touching cells
+            // Touch-friendly CSS
             cell.style.touchAction = 'none';
             cell.style.webkitTapHighlightColor = 'transparent';
             
             let isShowing = false;
+            let hideTimeout = null;
             
             // Show tooltip
             const showTooltip = () => {
                 isShowing = true;
+                if (hideTimeout) clearTimeout(hideTimeout);
                 cell.style.transform = 'scale(1.5)';
                 cell.style.zIndex = '100';
                 tooltipEl.style.opacity = '1';
@@ -1536,41 +1538,23 @@
                 tooltipEl.style.opacity = '0';
             };
             
-            // Mouse events (desktop)
+            // Mouse events (desktop hover)
             cell.onmouseenter = showTooltip;
             cell.onmouseleave = hideTooltip;
             
-            // Click/tap to toggle (works for both mouse and touch)
-            cell.addEventListener('click', (e) => {
+            // Simple click handler - toggles on click/tap
+            cell.onclick = (e) => {
                 e.stopPropagation();
+                if (hideTimeout) clearTimeout(hideTimeout);
+                
                 if (isShowing) {
                     hideTooltip();
                 } else {
                     showTooltip();
+                    // Auto-hide after 3 seconds on touch
+                    hideTimeout = setTimeout(hideTooltip, 3000);
                 }
-            });
-            
-            // Touch events for mobile
-            cell.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                showTooltip();
-            }, { passive: false });
-            
-            cell.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                // Auto-hide after 2 seconds on touch devices
-                setTimeout(() => {
-                    hideTooltip();
-                }, 2000);
-            }, { passive: false });
-            
-            // Hide tooltip when touching elsewhere
-            document.addEventListener('touchstart', (e) => {
-                if (!cell.contains(e.target)) {
-                    hideTooltip();
-                }
-            });
+            };
             
             return cell;
         }
