@@ -1,0 +1,2191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#e53935">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Blood Academy">
+    <meta name="description" content="Learn about blood biology and transfusion compatibility through fun interactive games!">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect fill='%23e53935' width='180' height='180' rx='40'/%3E%3Ctext x='90' y='125' font-size='110' text-anchor='middle'%3E🩸%3C/text%3E%3C/svg%3E">
+    <title>🩸 Blood Adventure Academy | Académie de l'Aventure Sanguine</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #e53935;
+            --primary-light: #ff6b6b;
+            --secondary: #00acc1;
+            --accent: #ffd54f;
+            --success: #43a047;
+            --warning: #fb8c00;
+            --purple: #7e57c2;
+            --pink: #ec407a;
+            --dark: #263238;
+            --light: #eceff1;
+            --shadow: 0 10px 40px rgba(0,0,0,0.15);
+            --shadow-hover: 0 20px 60px rgba(0,0,0,0.2);
+            --radius: 25px;
+            --radius-sm: 15px;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 50%, #48dbfb 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Language Switcher */
+        .lang-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 800;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .lang-btn.en {
+            background: linear-gradient(45deg, #e53935, #ff6b6b);
+            color: white;
+        }
+
+        .lang-btn.fr {
+            background: linear-gradient(45deg, #1565c0, #42a5f5);
+            color: white;
+        }
+
+        .lang-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .lang-btn.active {
+            box-shadow: 0 0 30px rgba(255,255,255,0.8), inset 0 0 20px rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        /* Welcome Modal */
+        .welcome-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            padding: 20px;
+        }
+
+        .welcome-content {
+            background: linear-gradient(145deg, #fff, #f5f5f5);
+            padding: 60px;
+            border-radius: var(--radius);
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+            animation: welcome-appear 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 4px solid var(--primary);
+        }
+
+        @keyframes welcome-appear {
+            from { transform: translateY(50px) scale(0.9); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .welcome-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .avatar-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .avatar-option {
+            font-size: 3.5rem;
+            padding: 15px;
+            background: white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            box-shadow: var(--shadow);
+        }
+
+        .avatar-option:hover {
+            transform: scale(1.15);
+        }
+
+        .avatar-option.selected {
+            border-color: var(--primary);
+            background: #ffebee;
+            transform: scale(1.1);
+        }
+
+        .name-input {
+            width: 100%;
+            padding: 18px 25px;
+            font-size: 1.2rem;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .name-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 25px rgba(229,57,53,0.2);
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 35px;
+            background: rgba(255,255,255,0.98);
+            border-radius: var(--radius);
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary), var(--primary));
+            background-size: 300% 100%;
+            animation: gradient-shift 3s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 12px;
+            background: linear-gradient(45deg, var(--primary), #ff6b6b, var(--warning));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            background: rgba(255,255,255,0.98);
+            border-radius: var(--radius);
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .progress-container {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .progress-label {
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: var(--dark);
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar {
+            height: 25px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary), var(--success));
+            background-size: 300% 100%;
+            border-radius: 15px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: gradient-shift 3s ease infinite;
+        }
+
+        .stats-grid {
+            display: flex;
+            gap: 12px;
+        }
+
+        .stat-badge {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            padding: 15px 20px;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 80px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: 700;
+        }
+
+        /* Navigation */
+        .nav-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .nav-btn {
+            padding: 18px 12px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            background: white;
+            color: var(--dark);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .nav-btn.active {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 0 30px rgba(255,255,255,0.6), var(--shadow);
+            background: linear-gradient(145deg, var(--primary), var(--primary-light));
+            color: white;
+        }
+
+        .nav-icon {
+            font-size: 2rem;
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+            background: rgba(255,255,255,0.98);
+            border-radius: var(--radius);
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            animation: section-appear 0.5s ease;
+        }
+
+        @keyframes section-appear {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section-header h2 {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+            font-weight: 900;
+        }
+
+        .section-header p {
+            font-size: 1.1rem;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .card {
+            background: linear-gradient(145deg, #ffffff, #f5f5f5);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-emoji {
+            font-size: 3.5rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            font-weight: 800;
+        }
+
+        .card p {
+            color: #666;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        /* Game Containers */
+        .game-container {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            padding: 30px;
+            border-radius: var(--radius);
+            margin: 25px 0;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            margin: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary), var(--primary-light));
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, var(--success), #66bb6a);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        /* Achievement Popup */
+        .achievement-popup {
+            position: fixed;
+            top: 100px;
+            right: -400px;
+            background: linear-gradient(145deg, #fff, #f8f9fa);
+            padding: 20px 25px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: right 0.5s ease;
+            border-left: 5px solid var(--success);
+        }
+
+        .achievement-popup.show {
+            right: 20px;
+        }
+
+        .achievement-icon {
+            font-size: 3rem;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin: 25px 0;
+        }
+
+        .data-table th {
+            background: linear-gradient(45deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 18px;
+            font-weight: 700;
+        }
+
+        .data-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        /* Drag and Drop */
+        .drag-item {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            cursor: grab;
+            box-shadow: var(--shadow);
+            display: inline-block;
+            margin: 10px;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .drag-item:hover {
+            transform: scale(1.1);
+        }
+
+        .drop-zone {
+            border: 3px dashed #ccc;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 15px;
+            min-height: 100px;
+            transition: all 0.3s;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--success);
+            background: rgba(67, 160, 71, 0.1);
+        }
+
+        .drop-zone.correct {
+            border-color: var(--success);
+            background: rgba(67, 160, 71, 0.2);
+        }
+
+        /* Certificate */
+        .certificate-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .certificate {
+            background: linear-gradient(145deg, #fff, #f5f5f5);
+            padding: 50px;
+            border-radius: var(--radius);
+            text-align: center;
+            max-width: 600px;
+            border: 6px solid var(--primary);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+            animation: cert-appear 0.6s ease;
+        }
+
+        @keyframes cert-appear {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .nav-menu { grid-template-columns: repeat(3, 1fr); }
+            .welcome-content { padding: 30px; }
+            .card-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="lang-switcher">
+        <button class="lang-btn en active" onclick="setLanguage('en')">🇬🇧 English</button>
+        <button class="lang-btn fr" onclick="setLanguage('fr')">🇫🇷 Français</button>
+    </div>
+
+    <!-- Achievement Popup -->
+    <div class="achievement-popup" id="achievementPopup">
+        <div class="achievement-icon">🏆</div>
+        <div>
+            <div style="font-weight: 700; color: #666; font-size: 0.85rem; text-transform: uppercase;" data-en="Achievement Unlocked!" data-fr="Succès Débloqué !">Achievement Unlocked!</div>
+            <div style="font-weight: 900; font-size: 1.2rem;" id="achievementName">First Step</div>
+        </div>
+    </div>
+
+    <!-- Certificate Modal -->
+    <div class="certificate-modal" id="certificateModal">
+        <div class="certificate">
+            <div style="font-size: 4rem;">🎓</div>
+            <h2 style="font-size: 2rem; color: var(--primary); margin: 15px 0;" data-en="Certificate of Mastery" data-fr="Certificat de Maîtrise">Certificate of Mastery</h2>
+            <p style="font-size: 1.2rem;" data-en="This certifies that" data-fr="Ce certificat atteste que">This certifies that</p>
+            <p style="font-size: 2rem; font-weight: 900; color: var(--primary); margin: 15px 0;" id="certName">Player</p>
+            <p style="font-size: 1.1rem;" data-en="has mastered Blood Science" data-fr="a maîtrisé la Science du Sang">has mastered Blood Science</p>
+            <div style="font-size: 3rem; margin: 25px 0;">⭐⭐⭐⭐⭐</div>
+            <p id="certDate" style="color: #666;"></p>
+            <button class="btn btn-primary" onclick="document.getElementById('certificateModal').style.display='none'" style="margin-top: 20px;">
+                <span data-en="Continue" data-fr="Continuer">Continue</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Welcome Modal -->
+    <div class="welcome-modal" id="welcomeModal">
+        <div class="welcome-content">
+            <div style="font-size: 4rem; animation: bounce 1s infinite;">🩸</div>
+            <h2 data-en="Welcome to Blood Adventure Academy!" data-fr="Bienvenue à l'Académie !">Welcome to Blood Adventure Academy!</h2>
+            <p data-en="Choose your character:" data-fr="Choisis ton personnage :" style="color: #666; margin: 15px 0;"></p>
+            
+            <div class="avatar-selector">
+                <div class="avatar-option selected" onclick="selectAvatar(this, '👩‍🔬')">👩‍🔬</div>
+                <div class="avatar-option" onclick="selectAvatar(this, '👨‍🔬')">👨‍🔬</div>
+                <div class="avatar-option" onclick="selectAvatar(this, '🧑‍⚕️')">🧑‍⚕️</div>
+                <div class="avatar-option" onclick="selectAvatar(this, '👩‍⚕️')">👩‍⚕️</div>
+                <div class="avatar-option" onclick="selectAvatar(this, '🦸')">🦸</div>
+                <div class="avatar-option" onclick="selectAvatar(this, '🦸‍♀️')">🦸‍♀️</div>
+            </div>
+            
+            <input type="text" class="name-input" id="playerName" placeholder="Your name / Ton nom" onkeypress="if(event.key==='Enter')startGame()">
+            <button class="btn btn-primary" onclick="startGame()" style="width: 100%;">
+                <span data-en="Start Adventure! 🚀" data-fr="Commencer ! 🚀">Start Adventure! 🚀</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Dashboard -->
+        <div class="dashboard">
+            <div class="dashboard-header">
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span data-en="Learning Progress" data-fr="Progrès">Learning Progress</span>
+                        <span id="levelDisplay">Level 1</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-badge">
+                        <div class="stat-value" id="stars">0</div>
+                        <div class="stat-label">⭐</div>
+                    </div>
+                    <div class="stat-badge">
+                        <div class="stat-value" id="badges">0</div>
+                        <div class="stat-label">🏆</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <h1 id="welcomeTitle">🩸 Blood Adventure Academy</h1>
+            <p data-en="Master the world of blood through 12 interactive adventures!"
+               data-fr="Maîtrise le monde du sang à travers 12 aventures interactives !">
+            </p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-menu">
+            <button class="nav-btn active" onclick="showSection(0)">
+                <span class="nav-icon">🏙️</span>
+                <span data-en="City" data-fr="Ville">City</span>
+            </button>
+            <button class="nav-btn" onclick="showSection(1)">
+                <span class="nav-icon">🔬</span>
+                <span data-en="Cells" data-fr="Cellules">Cells</span>
+            </button>
+            <button class="nav-btn" onclick="showSection(2)">
+                <span class="nav-icon">🎭</span>
+                <span data-en="Action" data-fr="Action">Action</span>
+            </button>
+            <button class="nav-btn" onclick="showSection(3)">
+                <span class="nav-icon">🛂</span>
+                <span data-en="Types" data-fr="Types">Types</span>
+            </button>
+            <button class="nav-btn" onclick="showSection(4)">
+                <span class="nav-icon">🔑</span>
+                <span data-en="Match" data-fr="Match">Match</span>
+            </button>
+            <button class="nav-btn" onclick="showSection(5)">
+                <span class="nav-icon">📋</span>
+                <span data-en="Rules" data-fr="Règles">Rules</span>
+            </button>
+            <button class="nav-btn" onclick="showSection(6)">
+                <span class="nav-icon">🧪</span>
+                <span data-en="Lab" data-fr="Labo">Lab</span>
+            </button>
+            <button class="nav-btn" onclick="showSection(7)">
+                <span class="nav-icon">🎯</span>
+                <span data-en="Quiz" data-fr="Quiz">Quiz</span>
+            </button>
+            <button class="nav-btn" onclick="showSection(8)">
+                <span class="nav-icon">🏥</span>
+                <span data-en="Doctor" data-fr="Docteur">Doctor</span>
+            </button>
+            <button class="nav-btn" onclick="showSection(9)">
+                <span class="nav-icon">🏭</span>
+                <span data-en="Factory" data-fr="Usine">Factory</span>
+            </button>
+            <button class="nav-btn" onclick="showSection(10)">
+                <span class="nav-icon">🧬</span>
+                <span data-en="DNA" data-fr="ADN">DNA</span>
+            </button>
+            <button class="nav-btn" onclick="showSection(11)">
+                <span class="nav-icon">🎓</span>
+                <span data-en="Final" data-fr="Final">Final</span>
+            </button>
+        </div>
+
+        <!-- ==================== MODULES ==================== -->
+
+        <!-- MODULE 1: Blood City -->
+        <div class="section active" id="section-0">
+            <div class="section-header">
+                <h2 data-en="Chapter 1: The City of Blood" data-fr="Chapitre 1 : La Ville du Sang">Chapter 1: The City of Blood</h2>
+                <p data-en="Your body is a city where 3 teams work 24/7 to keep you alive!" 
+                   data-fr="Ton corps est une ville où 3 équipes travaillent 24h/24 pour te garder en vie !">
+                </p>
+            </div>
+
+            <div class="card-grid">
+                <div class="card" onclick="revealCard(this, 'red')">
+                    <span class="card-emoji">🚚</span>
+                    <h3 style="color: #e53935;" data-en="Red Blood Cells" data-fr="Globules Rouges">Red Blood Cells</h3>
+                    <p class="card-short" data-en="The Delivery Team" data-fr="L'Équipe de Livraison">The Delivery Team</p>
+                    <div class="card-detail" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee;">
+                        <p data-en="They carry oxygen to every cell. You have 25 TRILLION of them!"
+                           data-fr="Ils transportent l'oxygène vers chaque cellule. Tu en as 25 BILLIONS !">
+                        </p>
+                        <div style="margin-top: 10px; padding: 10px; background: #ffebee; border-radius: 8px; font-weight: 700;" data-en="🔴 RED = DELIVER" data-fr="🔴 ROUGE = LIVRER">
+                            🔴 RED = DELIVER
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" onclick="revealCard(this, 'white')">
+                    <span class="card-emoji">🛡️</span>
+                    <h3 style="color: #546e7a;" data-en="White Blood Cells" data-fr="Globules Blancs">White Blood Cells</h3>
+                    <p class="card-short" data-en="The Defense Force" data-fr="La Force de Défense">The Defense Force</p>
+                    <div class="card-detail" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee;">
+                        <p data-en="They fight germs and viruses. They're your personal army!"
+                           data-fr="Ils combattent les microbes et virus. C'est ton armée personnelle !">
+                        </p>
+                        <div style="margin-top: 10px; padding: 10px; background: #eceff1; border-radius: 8px; font-weight: 700;" data-en="⚪ WHITE = DEFEND" data-fr="⚪ BLANC = DÉFENDRE">
+                            ⚪ WHITE = DEFEND
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" onclick="revealCard(this, 'platelet')">
+                    <span class="card-emoji">🔧</span>
+                    <h3 style="color: #ff8f00;" data-en="Platelets" data-fr="Plaquettes">Platelets</h3>
+                    <p class="card-short" data-en="The Repair Crew" data-fr="L'Équipe de Réparation">The Repair Crew</p>
+                    <div class="card-detail" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee;">
+                        <p data-en="They fix cuts by forming scabs. Tiny but mighty!"
+                           data-fr="Elles réparent les coupures en formant des croûtes. Petites mais puissantes !">
+                        </p>
+                        <div style="margin-top: 10px; padding: 10px; background: #fff8e1; border-radius: 8px; font-weight: 700;" data-en="🟡 PLATELETS = REPAIR" data-fr="🟡 PLAQUETTES = RÉPARER">
+                            🟡 PLATELETS = REPAIR
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-container" style="background: linear-gradient(145deg, var(--primary), #c62828); color: white;">
+                <h3 style="margin-bottom: 20px;" data-en="Memory Challenge" data-fr="Défi de Mémoire">Memory Challenge</h3>
+                <div id="memoryGame" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; max-width: 700px; margin: 0 auto;"></div>
+                <div id="memoryResult" style="margin-top: 20px; font-weight: 700;"></div>
+            </div>
+        </div>
+
+        <!-- MODULE 2: Microscope -->
+        <div class="section" id="section-1">
+            <div class="section-header">
+                <h2 data-en="Chapter 2: Microscope Explorer" data-fr="Chapitre 2 : Explorateur">Chapter 2: Microscope Explorer</h2>
+                <p data-en="Discover the microscopic world in a drop of blood!" 
+                   data-fr="Découvre le monde microscopique dans une goutte de sang !">
+                </p>
+            </div>
+
+            <div class="game-container">
+                <div id="bloodDrop" style="position: relative; width: 350px; height: 400px; margin: 0 auto; background: linear-gradient(180deg, #e53935, #c62828); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; overflow: hidden; box-shadow: 0 30px 60px rgba(229,57,53,0.4);"></div>
+                
+                <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                    <div style="background: white; padding: 18px; border-radius: 12px; box-shadow: var(--shadow); min-width: 100px;">
+                        <div style="font-size: 2rem; font-weight: 900; color: #e53935;">44%</div>
+                        <div style="font-size: 0.9rem;" data-en="Red Cells" data-fr="Rouges">Red Cells</div>
+                    </div>
+                    <div style="background: white; padding: 18px; border-radius: 12px; box-shadow: var(--shadow); min-width: 100px;">
+                        <div style="font-size: 2rem; font-weight: 900; color: #78909c;">1%</div>
+                        <div style="font-size: 0.9rem;" data-en="White Cells" data-fr="Blancs">White Cells</div>
+                    </div>
+                    <div style="background: white; padding: 18px; border-radius: 12px; box-shadow: var(--shadow); min-width: 100px;">
+                        <div style="font-size: 2rem; font-weight: 900; color: #ff8f00;"><1%</div>
+                        <div style="font-size: 0.9rem;" data-en="Platelets" data-fr="Plaquettes">Platelets</div>
+                    </div>
+                    <div style="background: white; padding: 18px; border-radius: 12px; box-shadow: var(--shadow); min-width: 100px;">
+                        <div style="font-size: 2rem; font-weight: 900; color: #42a5f5;">55%</div>
+                        <div style="font-size: 0.9rem;" data-en="Plasma" data-fr="Plasma">Plasma</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #e3f2fd; padding: 25px; border-radius: 15px; margin-top: 25px;">
+                <h3 data-en="Did You Know?" data-fr="Le Savais-Tu ?">Did You Know?</h3>
+                <ul style="margin-top: 15px; padding-left: 25px; line-height: 1.8;">
+                    <li data-en="One drop has 5 million red blood cells" 
+                        data-fr="Une goutte a 5 millions de globules rouges"></li>
+                    <li data-en="Red cells live 120 days" 
+                        data-fr="Les globules rouges vivent 120 jours"></li>
+                    <li data-en="Body makes 2 million new cells/second" 
+                        data-fr="Le corps produit 2 millions de nouvelles cellules/seconde"></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- MODULE 3: Action/Drag Drop -->
+        <div class="section" id="section-2">
+            <div class="section-header">
+                <h2 data-en="Chapter 3: Emergency Response" data-fr="Chapitre 3 : Intervention">Chapter 3: Emergency Response</h2>
+                <p data-en="Drag the right team to solve each emergency! Complete all 3 scenarios!" 
+                   data-fr="Fais glisser la bonne équipe pour résoudre chaque urgence ! Complète les 3 scénarios !">
+                </p>
+            </div>
+
+            <div class="game-container" style="background: linear-gradient(145deg, #667eea, #764ba2); color: white;">
+                <div id="emergencyScenario" style="font-size: 1.3rem; font-weight: 700; margin-bottom: 25px; padding: 20px; background: rgba(255,255,255,0.2); border-radius: 15px;">
+                    🚨 <span id="scenarioText" data-en="SCENARIO 1/3: You have a cut! Blood is coming out!" data-fr="SCÉNARIO 1/3 : Tu as une coupure ! Le sang sort !">SCENARIO 1/3: You have a cut! Blood is coming out!</span>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <div class="drag-item" draggable="true" ondragstart="drag(event)" data-type="platelet" style="display: flex; flex-direction: column; align-items: center; min-width: 120px;">
+                        <span style="font-size: 2.5rem;">🔧</span>
+                        <span style="font-weight: 700; margin-top: 5px; font-size: 1rem;" data-en="PLATELETS" data-fr="PLAQUETTES">PLATELETS</span>
+                        <span style="font-size: 0.85rem; opacity: 0.8;" data-en="(Repair)" data-fr="(Réparer)">(Repair)</span>
+                    </div>
+                    <div class="drag-item" draggable="true" ondragstart="drag(event)" data-type="white" style="display: flex; flex-direction: column; align-items: center; min-width: 120px;">
+                        <span style="font-size: 2.5rem;">🛡️</span>
+                        <span style="font-weight: 700; margin-top: 5px; font-size: 1rem;" data-en="WHITE CELLS" data-fr="GLOBULES BLANCS">WHITE CELLS</span>
+                        <span style="font-size: 0.85rem; opacity: 0.8;" data-en="(Defend)" data-fr="(Défendre)">(Defend)</span>
+                    </div>
+                    <div class="drag-item" draggable="true" ondragstart="drag(event)" data-type="red" style="display: flex; flex-direction: column; align-items: center; min-width: 120px;">
+                        <span style="font-size: 2.5rem;">🚚</span>
+                        <span style="font-weight: 700; margin-top: 5px; font-size: 1rem;" data-en="RED CELLS" data-fr="GLOBULES ROUGES">RED CELLS</span>
+                        <span style="font-size: 0.85rem; opacity: 0.8;" data-en="(Deliver)" data-fr="(Livrer)">(Deliver)</span>
+                    </div>
+                </div>
+
+                <div id="dropZonesContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-need="platelet" id="zone1">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🩹</div>
+                        <div style="font-weight: 700;" data-en="STOP THE BLEEDING" data-fr="ARRÊTER LE SAIGNEMENT">STOP THE BLEEDING</div>
+                        <div style="font-size: 0.9rem; margin-top: 5px; opacity: 0.8;" data-en="(Form a scab)" data-fr="(Former une croûte)">(Form a scab)</div>
+                    </div>
+                    <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-need="white" id="zone2">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🦠</div>
+                        <div style="font-weight: 700;" data-en="FIGHT GERMS" data-fr="COMBATTRE LES MICROBES">FIGHT GERMS</div>
+                        <div style="font-size: 0.9rem; margin-top: 5px; opacity: 0.8;" data-en="(Kill invaders)" data-fr="(Tuer les envahisseurs)">(Kill invaders)</div>
+                    </div>
+                    <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-need="red" id="zone3">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">💪</div>
+                        <div style="font-weight: 700;" data-en="DELIVER OXYGEN" data-fr="LIVRER DE L'OXYGÈNE">DELIVER OXYGEN</div>
+                        <div style="font-size: 0.9rem; margin-top: 5px; opacity: 0.8;" data-en="(Keep body working)" data-fr="(Garder le corps actif)">(Keep body working)</div>
+                    </div>
+                </div>
+
+                <div id="dragResult" style="margin-top: 25px; font-size: 1.3rem; font-weight: 700;"></div>
+                
+                <button class="btn" id="nextScenarioBtn" onclick="nextScenario()" style="background: white; color: #667eea; margin-top: 20px; display: none;">
+                    <span data-en="Next Emergency →" data-fr="Prochaine Urgence →">Next Emergency →</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- MODULE 4: Blood Types -->
+        <div class="section" id="section-3">
+            <div class="section-header">
+                <h2 data-en="Chapter 4: Blood Type Passports" data-fr="Chapitre 4 : Passeports">Chapter 4: Blood Type Passports</h2>
+                <p data-en="Just like passports, blood has different types!" 
+                   data-fr="Comme les passeports, le sang a différents types !">
+                </p>
+            </div>
+
+            <div class="card-grid">
+                <div class="card" onclick="togglePassport(this)" style="border-top: 5px solid #2196f3;">
+                    <div style="font-size: 3rem; font-weight: 900; color: #2196f3;">A</div>
+                    <h3>Type A</h3>
+                    <p data-en="40% of people have this type" data-fr="40% des gens ont ce type">40% of people have this type</p>
+                    <div class="passport-info" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee;">
+                        <p data-en="Most common in Europe. Has A markers on cells." 
+                           data-fr="Le plus commun en Europe. A des marqueurs A sur les cellules."></p>
+                    </div>
+                </div>
+
+                <div class="card" onclick="togglePassport(this)" style="border-top: 5px solid #4caf50;">
+                    <div style="font-size: 3rem; font-weight: 900; color: #4caf50;">B</div>
+                    <h3>Type B</h3>
+                    <p data-en="10% of people have this type" data-fr="10% des gens ont ce type">10% of people have this type</p>
+                    <div class="passport-info" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee;">
+                        <p data-en="More common in Asia and Africa. Has B markers." 
+                           data-fr="Plus commun en Asie et Afrique. A des marqueurs B."></p>
+                    </div>
+                </div>
+
+                <div class="card" onclick="togglePassport(this)" style="border-top: 5px solid #9c27b0;">
+                    <div style="font-size: 3rem; font-weight: 900; color: #9c27b0;">AB</div>
+                    <h3>Type AB</h3>
+                    <p data-en="Only 4% - The rarest!" data-fr="Seulement 4% - Le plus rare !">Only 4% - The rarest!</p>
+                    <div class="passport-info" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee;">
+                        <p data-en="Universal receiver! Has BOTH A and B markers." 
+                           data-fr="Receveur universel ! A LES DEUX marqueurs A et B."></p>
+                    </div>
+                </div>
+
+                <div class="card" onclick="togglePassport(this)" style="border-top: 5px solid #ff5722;">
+                    <div style="font-size: 3rem; font-weight: 900; color: #ff5722;">O</div>
+                    <h3>Type O</h3>
+                    <p data-en="45% - The most common" data-fr="45% - Le plus commun">45% - The most common</p>
+                    <div class="passport-info" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee;">
+                        <p data-en="Universal donor! No A or B markers." 
+                           data-fr="Donneur universel ! Pas de marqueurs A ou B."></p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 15px; margin-top: 25px; border-left: 5px solid #ff9800;">
+                <strong data-en="Rh Factor (+ or -):" data-fr="Facteur Rh (+ ou -) :">Rh Factor (+ or -):</strong>
+                <span data-en=" An extra marker. 85% of people are positive (+). Negative can give to positive, but not the other way!" 
+                      data-fr=" Un marqueur supplémentaire. 85% des gens sont positifs (+). Négatif peut donner à positif, mais pas l'inverse !">
+                </span>
+            </div>
+        </div>
+
+        <!-- MODULE 5: Keys & Locks Game -->
+        <div class="section" id="section-4">
+            <div class="section-header">
+                <h2 data-en="Chapter 5: The Matching Game" data-fr="Chapitre 5 : Le Jeu d'Assortiment">Chapter 5: The Matching Game</h2>
+                <p data-en="Not all blood can mix! Find compatible matches like keys and locks." 
+                   data-fr="Tout le sang ne peut pas se mélanger ! Trouve des assortiments compatibles comme des clés et des serrures.">
+                </p>
+            </div>
+
+            <div class="game-container" style="background: linear-gradient(145deg, #e3f2fd, #bbdefb);">
+                <div style="background: white; padding: 30px; border-radius: 15px; margin-bottom: 25px; box-shadow: var(--shadow);">
+                    <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 15px;" data-en="Patient needs:" data-fr="Le patient a besoin de :">Patient needs:</div>
+                    <div style="font-size: 3rem; font-weight: 900; color: var(--primary); padding: 15px; background: #f5f5f5; border-radius: 12px; display: inline-block; border: 3px solid var(--primary);">
+                        🔒 <span id="patientNeed">A+</span>
+                    </div>
+                </div>
+
+                <div data-en="Click ALL compatible donors:" data-fr="Clique sur TOUS les donneurs compatibles :" style="font-weight: 700; margin-bottom: 20px;"></div>
+
+                <div id="keysGrid" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px;"></div>
+                <div id="matchResult" style="margin-top: 25px; font-size: 1.3rem; font-weight: 700;"></div>
+                
+                <button class="btn" onclick="newKeyPatient()" style="background: var(--primary); color: white; margin-top: 20px;">
+                    <span data-en="🔄 New Patient" data-fr="🔄 Nouveau Patient">🔄 New Patient</span>
+                </button>
+            </div>
+
+            <div style="background: #f3e5f5; padding: 20px; border-radius: 15px; margin-top: 25px;">
+                <strong data-en="💡 Remember:" data-fr="💡 Rappelle-toi :">💡 Remember:</strong>
+                <ul style="margin-top: 10px; padding-left: 25px; line-height: 1.8;">
+                    <li data-en="O is the Universal Donor (gives to everyone)" data-fr="O est le Donneur Universel (donne à tout le monde)"></li>
+                    <li data-en="AB is the Universal Receiver (takes from everyone)" data-fr="AB est le Receveur Universel (prend de tout le monde)"></li>
+                    <li data-en="Rh negative (-) can give to positive (+)" data-fr="Rh négatif (-) peut donner à positif (+)"></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- MODULE 6: Compatibility Rules -->
+        <div class="section" id="section-5">
+            <div class="section-header">
+                <h2 data-en="Chapter 6: The Rules of Compatibility" data-fr="Chapitre 6 : Les Règles de Compatibilité">Chapter 6: The Rules of Compatibility</h2>
+                <p data-en="Master these simple rules to become a blood matching expert!" 
+                   data-fr="Maîtrise ces règles simples pour devenir un expert en assortiment de sang !">
+                </p>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th data-en="Type" data-fr="Type">Type</th>
+                        <th data-en="Can Give To" data-fr="Peut Donner À">Can Give To</th>
+                        <th data-en="Can Receive From" data-fr="Peut Recevoir De">Can Receive From</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="font-size: 1.5rem; font-weight: 900; color: #ff5722;">O</td>
+                        <td data-en="Everyone 🌍" data-fr="Tout le monde 🌍">Everyone 🌍</td>
+                        <td>O only</td>
+                    </tr>
+                    <tr>
+                        <td style="font-size: 1.5rem; font-weight: 900; color: #2196f3;">A</td>
+                        <td>A, AB</td>
+                        <td>A, O</td>
+                    </tr>
+                    <tr>
+                        <td style="font-size: 1.5rem; font-weight: 900; color: #4caf50;">B</td>
+                        <td>B, AB</td>
+                        <td>B, O</td>
+                    </tr>
+                    <tr>
+                        <td style="font-size: 1.5rem; font-weight: 900; color: #9c27b0;">AB</td>
+                        <td>AB only</td>
+                        <td data-en="Everyone 🌟" data-fr="Tout le monde 🌟">Everyone 🌟</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="game-container" style="background: linear-gradient(145deg, #fff8e1, #ffecb3);">
+                <h3 style="margin-bottom: 20px;" data-en="Memory Helper" data-fr="Aide-Mémoire">Memory Helper</h3>
+                <div style="font-size: 1.2rem; line-height: 2;">
+                    <p>🎁 <strong>O</strong> = <span data-en="Most Generous" data-fr="Le Plus Généreux">Most Generous</span> (gives to all)</p>
+                    <p>🌟 <strong>AB</strong> = <span data-en="Most Flexible" data-fr="Le Plus Flexible">Most Flexible</span> (receives from all)</p>
+                    <p>🔵 <strong>A</strong> & 🟢 <strong>B</strong> = <span data-en="In the Middle" data-fr="Au Milieu">In the Middle</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODULE 7: Compatibility Lab -->
+        <div class="section" id="section-6">
+            <div class="section-header">
+                <h2 data-en="Chapter 7: The Compatibility Lab" data-fr="Chapitre 7 : Le Labo de Compatibilité">Chapter 7: The Compatibility Lab</h2>
+                <p data-en="Mix blood samples and see what happens!" 
+                   data-fr="Mélange des échantillons de sang et vois ce qui se passe !">
+                </p>
+            </div>
+
+            <div class="game-container">
+                <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; max-width: 600px; margin: 0 auto;">
+                    <select id="donorSelect" style="padding: 15px; font-size: 1.2rem; border-radius: 10px; border: 2px solid #ddd;">
+                        <option value="">Select Donor</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                    <div style="font-size: 2rem;">+</div>
+                    <select id="recipientSelect" style="padding: 15px; font-size: 1.2rem; border-radius: 10px; border: 2px solid #ddd;">
+                        <option value="">Select Patient</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" onclick="testMix()" style="margin-top: 25px;">
+                    <span data-en="Mix Samples" data-fr="Mélanger">Mix Samples</span>
+                </button>
+
+                <div id="mixResult" style="margin-top: 30px; padding: 25px; border-radius: 15px; font-size: 1.3rem; font-weight: 700; display: none;"></div>
+            </div>
+        </div>
+
+        <!-- MODULE 8: Quiz Challenge -->
+        <div class="section" id="section-7">
+            <div class="section-header">
+                <h2 data-en="Chapter 8: Quiz Challenge" data-fr="Chapitre 8 : Défi Quiz">Chapter 8: Quiz Challenge</h2>
+                <p data-en="Test your knowledge! Answer correctly to earn stars!" 
+                   data-fr="Teste tes connaissances ! Réponds correctement pour gagner des étoiles !">
+                </p>
+            </div>
+
+            <div class="game-container" style="background: linear-gradient(145deg, #7e57c2, #5e35b1); color: white;">
+                <div id="quizContainer">
+                    <div id="quizQuestion" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 25px; padding: 25px; background: rgba(255,255,255,0.2); border-radius: 15px;">
+                        Can Type O give blood to Type AB?
+                    </div>
+                    <div id="quizOptions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <button class="btn" onclick="checkQuiz(true)" style="background: white; color: #333;">✅ Yes</button>
+                        <button class="btn" onclick="checkQuiz(false)" style="background: white; color: #333;">❌ No</button>
+                    </div>
+                </div>
+                <div id="quizResult" style="margin-top: 25px; font-size: 1.3rem;"></div>
+            </div>
+        </div>
+
+        <!-- MODULE 9: Hospital Emergency -->
+        <div class="section" id="section-8">
+            <div class="section-header">
+                <h2 data-en="Chapter 9: Hospital Emergency" data-fr="Chapitre 9 : Urgence à l'Hôpital">Chapter 9: Hospital Emergency</h2>
+                <p data-en="You're the doctor! Save patients with the right blood!" 
+                   data-fr="Tu es le docteur ! Sauve les patients avec le bon sang !">
+                </p>
+            </div>
+
+            <div class="game-container" style="background: linear-gradient(145deg, #42a5f5, #1976d2); color: white;">
+                <div style="background: white; color: #333; padding: 25px; border-radius: 15px; margin-bottom: 25px; max-width: 400px; margin-left: auto; margin-right: auto;">
+                    <div style="font-size: 4rem;">👤</div>
+                    <div style="font-weight: 700; margin: 15px 0;" data-en="Patient Blood Type:" data-fr="Groupe Sanguin :">Patient Blood Type:</div>
+                    <div id="hospitalPatient" style="font-size: 2.5rem; font-weight: 900; color: var(--primary); padding: 10px 30px; background: #f5f5f5; border-radius: 10px; display: inline-block; border: 3px solid var(--primary);">AB+</div>
+                </div>
+
+                <div data-en="Choose compatible blood:" data-fr="Choisis le sang compatible :" style="font-weight: 700; margin-bottom: 20px;"></div>
+
+                <div id="bloodBank" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px;"></div>
+                <div id="hospitalResult" style="margin-top: 25px; font-size: 1.4rem; font-weight: 700;"></div>
+
+                <button class="btn" onclick="newPatient()" style="background: white; color: #1976d2; margin-top: 20px;">
+                    <span data-en="New Patient" data-fr="Nouveau Patient">New Patient</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- MODULE 10: Blood Factory -->
+        <div class="section" id="section-9">
+            <div class="section-header">
+                <h2 data-en="Chapter 10: The Blood Factory" data-fr="Chapitre 10 : L'Usine à Sang">Chapter 10: The Blood Factory</h2>
+                <p data-en="Discover where blood is made in your body!" 
+                   data-fr="Découvre où le sang est fabriqué dans ton corps !">
+                </p>
+            </div>
+
+            <div class="card-grid">
+                <div class="card" style="background: linear-gradient(145deg, #ffebee, #ffcdd2);">
+                    <span class="card-emoji">🦴</span>
+                    <h3 data-en="Bone Marrow" data-fr="Moelle Osseuse">Bone Marrow</h3>
+                    <p data-en="The blood factory! Makes trillions of blood cells daily inside your bones." 
+                       data-fr="L'usine à sang ! Fabrique des billions de cellules sanguines chaque jour dans tes os.">
+                    </p>
+                </div>
+
+                <div class="card" style="background: linear-gradient(145deg, #e3f2fd, #bbdefb);">
+                    <span class="card-emoji">💨</span>
+                    <h3 data-en="Lungs" data-fr="Poumons">Lungs</h3>
+                    <p data-en="Red cells pick up oxygen here to deliver to your body." 
+                       data-fr="Les globules rouges prennent l'oxygène ici pour le livrer à ton corps.">
+                    </p>
+                </div>
+
+                <div class="card" style="background: linear-gradient(145deg, #e8f5e9, #c8e6c9);">
+                    <span class="card-emoji">🍽️</span>
+                    <h3 data-en="Intestines" data-fr="Intestins">Intestines</h3>
+                    <p data-en="Absorb nutrients that help make blood. Iron is especially important!" 
+                       data-fr="Absorbent les nutriments qui aident à faire le sang. Le fer est particulièrement important !">
+                    </p>
+                </div>
+
+                <div class="card" style="background: linear-gradient(145deg, #fff3e0, #ffe0b2);">
+                    <span class="card-emoji">🫀</span>
+                    <h3 data-en="Heart" data-fr="Cœur">Heart</h3>
+                    <p data-en="The pump! Pushes blood through 100,000 km of blood vessels!" 
+                       data-fr="La pompe ! Pousse le sang à travers 100 000 km de vaisseaux sanguins !">
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #e8f5e9; padding: 25px; border-radius: 15px; margin-top: 25px;">
+                <h3 data-en="🍎 Healthy Blood Diet:" data-fr="🍎 Régime pour un Sang Sain :">🍎 Healthy Blood Diet:</h3>
+                <ul style="margin-top: 15px; padding-left: 25px; line-height: 2;">
+                    <li>🥩 <span data-en="Iron-rich foods (meat, beans, spinach)" data-fr="Aliments riches en fer (viande, haricots, épinards)"></span></li>
+                    <li>🍊 <span data-en="Vitamin C (helps absorb iron)" data-fr="Vitamine C (aide à absorber le fer)"></span></li>
+                    <li>💧 <span data-en="Water (blood is mostly water!)" data-fr="Eau (le sang est surtout de l'eau !)"></span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- MODULE 11: Genetics & DNA -->
+        <div class="section" id="section-10">
+            <div class="section-header">
+                <h2 data-en="Chapter 11: Genetics & Inheritance" data-fr="Chapitre 11 : Génétique et Hérédité">Chapter 11: Genetics & Inheritance</h2>
+                <p data-en="Blood type is inherited from your parents! Let's explore how!" 
+                   data-fr="Le groupe sanguin est hérité de tes parents ! Voyons comment !">
+                </p>
+            </div>
+
+            <div class="game-container" style="background: linear-gradient(145deg, #f3e5f5, #e1bee7);">
+                <h3 style="margin-bottom: 25px;" data-en="Blood Type Inheritance" data-fr="Hérédité du Groupe Sanguin">Blood Type Inheritance</h3>
+                
+                <div style="display: flex; justify-content: center; align-items: center; gap: 30px; flex-wrap: wrap; margin-bottom: 30px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;" data-en="Parent 1" data-fr="Parent 1">Parent 1</div>
+                        <select id="parent1" style="padding: 12px 20px; font-size: 1.2rem; border-radius: 10px; border: 2px solid #9c27b0;">
+                            <option>A</option>
+                            <option>B</option>
+                            <option>AB</option>
+                            <option>O</option>
+                        </select>
+                    </div>
+                    <div style="font-size: 2rem;">+</div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;" data-en="Parent 2" data-fr="Parent 2">Parent 2</div>
+                        <select id="parent2" style="padding: 12px 20px; font-size: 1.2rem; border-radius: 10px; border: 2px solid #9c27b0;">
+                            <option>A</option>
+                            <option>B</option>
+                            <option>AB</option>
+                            <option>O</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="calculateInheritance()">
+                    <span data-en="Predict Child's Type" data-fr="Prédire le Type de l'Enfant">Predict Child's Type</span>
+                </button>
+
+                <div id="inheritanceResult" style="margin-top: 25px; padding: 20px; background: white; border-radius: 15px; font-size: 1.2rem; display: none;"></div>
+            </div>
+
+            <div style="background: #fff3e0; padding: 20px; border-radius: 15px; margin-top: 25px;">
+                <strong data-en="🧬 Fun Fact:" data-fr="🧬 Fait Amusant :">🧬 Fun Fact:</strong>
+                <p style="margin-top: 10px;" data-en="O is the 'recessive' type. For a child to be O, both parents must contribute an O gene. That's why O is less common even though it's the original human blood type!" 
+                   data-fr="O est le type 'récessif'. Pour qu'un enfant soit O, les deux parents doivent contribuer un gène O. C'est pourquoi O est moins commun même si c'est le groupe sanguin humain original !">
+                </p>
+            </div>
+        </div>
+
+        <!-- MODULE 12: Final Challenge -->
+        <div class="section" id="section-11">
+            <div class="section-header">
+                <h2 data-en="Chapter 12: Final Exam" data-fr="Chapitre 12 : Examen Final">Chapter 12: Final Exam</h2>
+                <p data-en="Complete all 3 challenges to earn your Blood Master Certificate!" 
+                   data-fr="Complète les 3 défis pour gagner ton Certificat de Maître du Sang !">
+                </p>
+            </div>
+
+            <!-- Challenge Progress -->
+            <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">
+                <div id="challenge1Indicator" style="background: var(--primary); color: white; padding: 15px 25px; border-radius: 12px; font-weight: 700;">🔬 1. Microscope</div>
+                <div id="challenge2Indicator" style="background: #ccc; color: #666; padding: 15px 25px; border-radius: 12px; font-weight: 700;">🧪 2. Lab Test</div>
+                <div id="challenge3Indicator" style="background: #ccc; color: #666; padding: 15px 25px; border-radius: 12px; font-weight: 700;">🏥 3. Emergency</div>
+            </div>
+
+            <!-- CHALLENGE 1: Cell Identification -->
+            <div id="challenge1" class="game-container" style="background: linear-gradient(145deg, #7e57c2, #5e35b1); color: white;">
+                <h3 style="margin-bottom: 15px;">🔬 Challenge 1: Cell Identification</h3>
+                <p style="margin-bottom: 20px;" data-en="What does each cell do? Match them correctly!" 
+                   data-fr="Que fait chaque cellule ? Assortis-les correctement !"></p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; max-width: 800px; margin: 0 auto;">
+                    <div class="final-quiz-item" onclick="checkFinalQuiz(1, 'red', this)" style="background: white; color: #333; padding: 20px; border-radius: 12px; cursor: pointer;">
+                        <div style="font-size: 2rem;">🔴</div>
+                        <div style="font-weight: 700;">Red Blood Cell</div>
+                    </div>
+                    <div onclick="checkFinalQuiz(1, 'white', this)" style="background: white; color: #333; padding: 20px; border-radius: 12px; cursor: pointer;">
+                        <div style="font-size: 2rem;">⚪</div>
+                        <div style="font-weight: 700;">White Blood Cell</div>
+                    </div>
+                    <div onclick="checkFinalQuiz(1, 'platelet', this)" style="background: white; color: #333; padding: 20px; border-radius: 12px; cursor: pointer;">
+                        <div style="font-size: 2rem;">🟡</div>
+                        <div style="font-weight: 700;">Platelet</div>
+                    </div>
+                </div>
+                
+                <div id="challenge1Question" style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 10px; font-weight: 700;">
+                    Question: Which cell DELIVERS OXYGEN?
+                </div>
+                <div id="challenge1Result" style="margin-top: 15px; font-weight: 700;"></div>
+            </div>
+
+            <!-- CHALLENGE 2: Quick Compatibility -->
+            <div id="challenge2" class="game-container" style="background: linear-gradient(145deg, #00897b, #00695c); color: white; display: none;">
+                <h3 style="margin-bottom: 15px;">🧪 Challenge 2: Quick Compatibility</h3>
+                <p style="margin-bottom: 20px;" data-en="Answer 3 compatibility questions correctly!" 
+                   data-fr="Réponds correctement à 3 questions de compatibilité !"></p>
+                
+                <div id="compatQuestion" style="font-size: 1.3rem; font-weight: 700; padding: 20px; background: rgba(255,255,255,0.2); border-radius: 12px; margin-bottom: 20px;">
+                    Can Type O give to Type A?
+                </div>
+                
+                <div style="display: flex; justify-content: center; gap: 15px;">
+                    <button class="btn" onclick="checkCompatAnswer(true)" style="background: white; color: #00897b; font-weight: 700;">✅ YES</button>
+                    <button class="btn" onclick="checkCompatAnswer(false)" style="background: white; color: #00897b; font-weight: 700;">❌ NO</button>
+                </div>
+                
+                <div id="challenge2Progress" style="margin-top: 20px;">Progress: 0/3</div>
+                <div id="challenge2Result" style="margin-top: 15px; font-weight: 700;"></div>
+            </div>
+
+            <!-- CHALLENGE 3: Emergency Room -->
+            <div id="challenge3" class="game-container" style="background: linear-gradient(145deg, #c62828, #b71c1c); color: white; display: none;">
+                <h3 style="margin-bottom: 15px;">🏥 Challenge 3: Emergency Room</h3>
+                <p style="margin-bottom: 20px;" data-en="Save 3 patients by selecting compatible blood!" 
+                   data-fr="Sauve 3 patients en sélectionnant le sang compatible !"></p>
+                
+                <div id="finalPatients" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 20px;"></div>
+                
+                <div data-en="Blood Bank:" data-fr="Banque de Sang :" style="font-weight: 700; margin-bottom: 10px;"></div>
+                <div id="finalBloodBank" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 8px;"></div>
+                
+                <div id="finalResult" style="margin-top: 20px; font-weight: 700;"></div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button id="nextChallengeBtn" class="btn btn-success" onclick="nextFinalChallenge()" style="font-size: 1.2rem; padding: 18px 40px; display: none;">
+                    <span data-en="Next Challenge →" data-fr="Prochain Défi →">Next Challenge →</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Game State
+        let currentLang = 'en';
+        let currentSection = 0;
+        let playerName = '';
+        let playerAvatar = '👩‍🔬';
+        let progress = 0;
+        let stars = 0;
+        let badges = 0;
+        let sectionsCompleted = new Set();
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initMemoryGame();
+            initBloodDrop();
+        });
+
+        function startGame() {
+            const name = document.getElementById('playerName').value.trim();
+            playerName = name || (currentLang === 'en' ? 'Explorer' : 'Explorateur');
+            document.getElementById('welcomeModal').style.display = 'none';
+            document.getElementById('welcomeTitle').textContent = playerAvatar + ' ' + playerName;
+            showAchievement('Welcome!');
+        }
+
+        function selectAvatar(el, avatar) {
+            document.querySelectorAll('.avatar-option').forEach(a => a.classList.remove('selected'));
+            el.classList.add('selected');
+            playerAvatar = avatar;
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.lang-btn.' + lang).classList.add('active');
+            document.querySelectorAll('[data-en]').forEach(el => {
+                const text = el.getAttribute('data-' + lang);
+                if (text) el.textContent = text;
+            });
+            
+            // Reinitialize modules with new language
+            initMemoryGame();
+            initBloodDrop();
+        }
+
+        function showSection(index) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('section-' + index).classList.add('active');
+            document.querySelectorAll('.nav-btn')[index].classList.add('active');
+            currentSection = index;
+            
+            if (!sectionsCompleted.has(index)) {
+                sectionsCompleted.add(index);
+                progress = (sectionsCompleted.size / 12) * 100;
+                document.getElementById('progressFill').style.width = progress + '%';
+                document.getElementById('levelDisplay').textContent = 'Level ' + Math.floor(progress / 20 + 1);
+                
+                if (sectionsCompleted.size === 12) showCertificate();
+            }
+        }
+
+        function showAchievement(name) {
+            badges++;
+            document.getElementById('badges').textContent = badges;
+            const popup = document.getElementById('achievementPopup');
+            document.getElementById('achievementName').textContent = name;
+            popup.classList.add('show');
+            setTimeout(() => popup.classList.remove('show'), 3000);
+        }
+
+        function showCertificate() {
+            document.getElementById('certName').textContent = playerName;
+            document.getElementById('certDate').textContent = new Date().toLocaleDateString();
+            document.getElementById('certificateModal').style.display = 'flex';
+        }
+
+        // Module 1: Memory Game
+        function initMemoryGame() {
+            const game = document.getElementById('memoryGame');
+            const items = [
+                { emoji: '🔴', text: { en: 'RED = DELIVER', fr: 'ROUGE = LIVRER' } },
+                { emoji: '⚪', text: { en: 'WHITE = DEFEND', fr: 'BLANC = DÉFENDRE' } },
+                { emoji: '🟡', text: { en: 'PLATELETS = REPAIR', fr: 'PLAQUETTES = RÉPARER' } }
+            ];
+            game.innerHTML = items.map(item => `
+                <div onclick="matchCard(this)" style="background: white; padding: 20px; border-radius: 12px; cursor: pointer; color: #333;">
+                    <div style="font-size: 2.5rem;">${item.emoji}</div>
+                    <div style="font-weight: 700; margin-top: 10px;">${item.text[currentLang]}</div>
+                </div>
+            `).join('');
+        }
+
+        function matchCard(card) {
+            stars += 5;
+            document.getElementById('stars').textContent = stars;
+            card.style.background = '#c8e6c9';
+            document.getElementById('memoryResult').textContent = currentLang === 'en' ? '✅ Great! +5 stars!' : '✅ Super ! +5 étoiles !';
+        }
+
+        function revealCard(card, type) {
+            const detail = card.querySelector('.card-detail');
+            detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Module 2: Blood Drop
+        const cellLabels = {
+            red: { en: '🔴 Red Blood Cell: Delivers oxygen!', fr: '🔴 Globule Rouge : Livre de l\'oxygène !' },
+            white: { en: '⚪ White Blood Cell: Fights germs!', fr: '⚪ Globule Blanc : Combat les microbes !' },
+            platelet: { en: '🟡 Platelet: Repairs cuts!', fr: '🟡 Plaquette : Répare les coupures !' }
+        };
+        
+        function initBloodDrop() {
+            const container = document.getElementById('bloodDrop');
+            container.innerHTML = '';
+            
+            // Red blood cells (44% - most numerous)
+            for (let i = 0; i < 25; i++) {
+                const cell = createCell(
+                    'radial-gradient(circle at 30% 30%, #ff6b6b, #c62828)',
+                    20 + Math.random() * 15,
+                    300, 350,
+                    cellLabels.red,
+                    1
+                );
+                container.appendChild(cell);
+            }
+            
+            // White blood cells (1% - larger)
+            for (let i = 0; i < 4; i++) {
+                const cell = createCell(
+                    'radial-gradient(circle at 30% 30%, #ffffff, #cfd8dc)',
+                    30 + Math.random() * 12,
+                    300, 350,
+                    cellLabels.white,
+                    10
+                );
+                container.appendChild(cell);
+            }
+            
+            // Platelets (<1% - smallest)
+            for (let i = 0; i < 10; i++) {
+                const cell = createCell(
+                    'radial-gradient(circle at 30% 30%, #ffd54f, #ff8f00)',
+                    8 + Math.random() * 6,
+                    320, 370,
+                    cellLabels.platelet,
+                    5
+                );
+                container.appendChild(cell);
+            }
+        }
+        
+        function createCell(gradient, size, maxX, maxY, labelObj, zIndex) {
+            const cell = document.createElement('div');
+            cell.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                background: ${gradient};
+                border-radius: 50%;
+                left: ${Math.random() * maxX}px;
+                top: ${Math.random() * maxY}px;
+                box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+                cursor: pointer;
+                transition: transform 0.3s;
+                z-index: ${zIndex};
+            `;
+            
+            // Create tooltip
+            const tooltipEl = document.createElement('div');
+            tooltipEl.textContent = labelObj[currentLang];
+            tooltipEl.style.cssText = `
+                position: absolute;
+                bottom: ${size + 10}px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(255,255,255,0.98);
+                color: #333;
+                padding: 8px 12px;
+                border-radius: 8px;
+                font-size: 0.85rem;
+                font-weight: 700;
+                white-space: nowrap;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 100;
+            `;
+            cell.appendChild(tooltipEl);
+            
+            // Update tooltip on language change
+            cell.updateTooltip = () => {
+                tooltipEl.textContent = labelObj[currentLang];
+            };
+            
+            cell.onmouseenter = () => {
+                cell.style.transform = 'scale(1.5)';
+                cell.style.zIndex = '100';
+                tooltipEl.style.opacity = '1';
+            };
+            cell.onmouseleave = () => {
+                cell.style.transform = 'scale(1)';
+                cell.style.zIndex = zIndex;
+                tooltipEl.style.opacity = '0';
+            };
+            
+            return cell;
+        }
+
+        // Module 3: Drag and Drop - Multiple Scenarios
+        let currentScenario = 1;
+        let scenariosCompleted = 0;
+        
+        const scenarios = {
+            1: { // Cut scenario - platelets primary
+                en: { title: "SCENARIO 1/3: You have a cut! Blood is coming out!", 
+                      zones: [
+                          { type: "platelet", main: "STOP THE BLEEDING", sub: "(Form a scab)", icon: "🩹" },
+                          { type: "white", main: "PREVENT INFECTION", sub: "(Kill entering germs)", icon: "🛡️" },
+                          { type: "red", main: "MAINTAIN FLOW", sub: "(Keep delivering oxygen)", icon: "🩸" }
+                      ]},
+                fr: { title: "SCÉNARIO 1/3 : Tu as une coupure ! Le sang sort !", 
+                      zones: [
+                          { type: "platelet", main: "ARRÊTER LE SAIGNEMENT", sub: "(Former une croûte)", icon: "🩹" },
+                          { type: "white", main: "PRÉVENIR L'INFECTION", sub: "(Tuer les microbes entrants)", icon: "🛡️" },
+                          { type: "red", main: "MAINTENIR LE FLUX", sub: "(Continuer à livrer l'oxygène)", icon: "🩸" }
+                      ]}
+            },
+            2: { // Flu scenario - white cells primary
+                en: { title: "SCENARIO 2/3: You have the flu! Germs are attacking!", 
+                      zones: [
+                          { type: "white", main: "ATTACK VIRUSES", sub: "(Destroy invaders)", icon: "⚔️" },
+                          { type: "red", main: "TRANSPORT DEFENDERS", sub: "(Move white cells to battle)", icon: "🚚" },
+                          { type: "platelet", main: "STAY READY", sub: "(Prepare for injuries)", icon: "⏸️" }
+                      ]},
+                fr: { title: "SCÉNARIO 2/3 : Tu as la grippe ! Les microbes attaquent !", 
+                      zones: [
+                          { type: "white", main: "ATTAQUER LES VIRUS", sub: "(Détruire les envahisseurs)", icon: "⚔️" },
+                          { type: "red", main: "TRANSPORTER LES DÉFENSEURS", sub: "(Amener les globules blancs au combat)", icon: "🚚" },
+                          { type: "platelet", main: "RESTER PRÊT", sub: "(Se préparer aux blessures)", icon: "⏸️" }
+                      ]}
+            },
+            3: { // Running scenario - red cells primary
+                en: { title: "SCENARIO 3/3: You're running a race! Muscles need energy!", 
+                      zones: [
+                          { type: "red", main: "DELIVER OXYGEN FAST", sub: "(Feed working muscles)", icon: "💨" },
+                          { type: "white", main: "GUARD BARRIERS", sub: "(Watch for damage)", icon: "👁️" },
+                          { type: "platelet", main: "REPAIR MICRO-DAMAGE", sub: "(Fix small muscle tears)", icon: "🔨" }
+                      ]},
+                fr: { title: "SCÉNARIO 3/3 : Tu cours une course ! Les muscles ont besoin d'énergie !", 
+                      zones: [
+                          { type: "red", main: "LIVRER L'OXYGÈNE VITE", sub: "(Nourrir les muscles qui travaillent)", icon: "💨" },
+                          { type: "white", main: "SURVEILLER", sub: "(Observer les dommages)", icon: "👁️" },
+                          { type: "platelet", main: "RÉPARER MICRO-DOMMAGES", sub: "(Réparer petites déchirures musculaires)", icon: "🔨" }
+                      ]}
+            }
+        };
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+            ev.target.closest('.drop-zone').classList.add('drag-over');
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData('type', ev.target.dataset.type);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const zone = ev.target.closest('.drop-zone');
+            zone.classList.remove('drag-over');
+            const type = ev.dataTransfer.getData('type');
+            const need = zone.dataset.need;
+            
+            if (type === need) {
+                zone.classList.add('correct');
+                zone.innerHTML = '✅';
+                checkScenarioComplete();
+            } else {
+                zone.style.background = 'rgba(244, 67, 54, 0.3)';
+                setTimeout(() => zone.style.background = '', 500);
+            }
+        }
+        
+        function checkScenarioComplete() {
+            const correctZones = document.querySelectorAll('#section-2 .drop-zone.correct');
+            if (correctZones.length === 3) {
+                scenariosCompleted++;
+                stars += 15;
+                document.getElementById('stars').textContent = stars;
+                
+                if (scenariosCompleted === 3) {
+                    document.getElementById('dragResult').innerHTML = '🎉🎉🎉 ' + (currentLang === 'en' ? 'AMAZING! You completed all emergencies! +45 stars!' : 'INCROYABLE ! Tu as complété toutes les urgences ! +45 étoiles !');
+                    showAchievement('Emergency Expert!');
+                } else {
+                    document.getElementById('dragResult').innerHTML = '✅ ' + (currentLang === 'en' ? 'Scenario complete! +' : 'Scénario complété ! +') + '15 stars!';
+                    document.getElementById('nextScenarioBtn').style.display = 'inline-block';
+                }
+            }
+        }
+        
+        function nextScenario() {
+            currentScenario++;
+            if (currentScenario > 3) currentScenario = 1;
+            
+            const scenario = scenarios[currentScenario][currentLang];
+            document.getElementById('scenarioText').textContent = scenario.title;
+            document.getElementById('nextScenarioBtn').style.display = 'none';
+            document.getElementById('dragResult').innerHTML = '';
+            
+            // Reset zones with scenario-specific actions
+            const zones = ['zone1', 'zone2', 'zone3'];
+            zones.forEach((zoneId, idx) => {
+                const zone = document.getElementById(zoneId);
+                const zoneData = scenario.zones[idx];
+                
+                zone.dataset.need = zoneData.type;
+                zone.classList.remove('correct');
+                zone.innerHTML = `
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">${zoneData.icon}</div>
+                    <div style="font-weight: 700;">${zoneData.main}</div>
+                    <div style="font-size: 0.9rem; margin-top: 5px; opacity: 0.8;">${zoneData.sub}</div>
+                `;
+            });
+        }
+
+        // Module 4: Passports
+        function togglePassport(card) {
+            const info = card.querySelector('.passport-info');
+            // Check computed style to handle initial state properly
+            const isHidden = window.getComputedStyle(info).display === 'none';
+            info.style.display = isHidden ? 'block' : 'none';
+            
+            if (isHidden) {
+                stars += 2;
+                document.getElementById('stars').textContent = stars;
+            }
+        }
+
+        // Module 5: Keys & Locks
+        let currentKeyPatient = '';
+        let matchedDonors = new Set();
+        
+        function initKeysGame() {
+            newKeyPatient();
+        }
+        
+        function newKeyPatient() {
+            const types = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+            currentKeyPatient = types[Math.floor(Math.random() * types.length)];
+            document.getElementById('patientNeed').textContent = currentKeyPatient;
+            matchedDonors.clear();
+            
+            const grid = document.getElementById('keysGrid');
+            grid.innerHTML = '';
+            
+            // Shuffle for variety
+            const shuffled = [...types].sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach(type => {
+                const btn = document.createElement('button');
+                btn.className = 'btn key-btn';
+                btn.style.cssText = 'background: white; color: #333; min-width: 85px; padding: 12px 20px;';
+                btn.innerHTML = '🔑 ' + type;
+                btn.dataset.type = type;
+                btn.onclick = () => checkMatch(type, btn);
+                grid.appendChild(btn);
+            });
+            
+            document.getElementById('matchResult').innerHTML = '';
+        }
+
+        function checkMatch(donor, btn) {
+            if (btn.classList.contains('matched')) return;
+            
+            if (isCompatible(donor, currentKeyPatient)) {
+                btn.classList.add('matched');
+                btn.style.background = '#4caf50';
+                btn.style.color = 'white';
+                matchedDonors.add(donor);
+                stars += 5;
+                document.getElementById('stars').textContent = stars;
+                
+                // Count how many compatible donors exist
+                const types = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+                const compatibleCount = types.filter(t => isCompatible(t, currentKeyPatient)).length;
+                
+                if (matchedDonors.size === compatibleCount) {
+                    document.getElementById('matchResult').innerHTML = '<span style="color: #2e7d32;">🎉 ' + (currentLang === 'en' ? 'Found all ' : 'Trouvé tous les ') + compatibleCount + (currentLang === 'en' ? ' compatible donors! +' : ' donneurs compatibles ! +') + (compatibleCount * 5) + ' stars!</span>';
+                } else {
+                    document.getElementById('matchResult').innerHTML = '<span style="color: #2e7d32;">✅ ' + (currentLang === 'en' ? 'Correct! Keep finding more! +' : 'Correct ! Continue à en trouver ! +') + '5 stars</span>';
+                }
+            } else {
+                btn.style.background = '#f44336';
+                btn.style.color = 'white';
+                document.getElementById('matchResult').innerHTML = '<span style="color: #c62828;">❌ ' + (currentLang === 'en' ? 'Not compatible! Try again!' : 'Pas compatible ! Réessaie !') + '</span>';
+                setTimeout(() => {
+                    btn.style.background = 'white';
+                    btn.style.color = '#333';
+                }, 1000);
+            }
+        }
+
+        function isCompatible(donor, recipient) {
+            const dGroup = donor.replace(/[+-]/, '');
+            const dRh = donor.includes('+') ? '+' : '-';
+            const rGroup = recipient.replace(/[+-]/, '');
+            const rRh = recipient.includes('+') ? '+' : '-';
+            
+            if (rRh === '-' && dRh === '+') return false;
+            if (dGroup === 'O') return true;
+            if (rGroup === 'AB') return true;
+            return dGroup === rGroup;
+        }
+
+        // Module 7: Lab
+        function testMix() {
+            const donor = document.getElementById('donorSelect').value;
+            const recipient = document.getElementById('recipientSelect').value;
+            const result = document.getElementById('mixResult');
+            
+            if (!donor || !recipient) {
+                result.style.display = 'block';
+                result.style.background = '#fff3e0';
+                result.textContent = currentLang === 'en' ? 'Please select both!' : 'Sélectionne les deux !';
+                return;
+            }
+            
+            result.style.display = 'block';
+            if (isCompatible(donor, recipient)) {
+                result.style.background = '#c8e6c9';
+                result.style.color = '#2e7d32';
+                result.innerHTML = '✅ ' + (currentLang === 'en' ? 'SAFE! These can mix!' : 'SÛR ! Ceux-ci peuvent se mélanger !');
+                stars += 5;
+            } else {
+                result.style.background = '#ffcdd2';
+                result.style.color = '#c62828';
+                result.innerHTML = '⚠️ ' + (currentLang === 'en' ? 'DANGER! Body will attack!' : 'DANGER ! Le corps va attaquer !');
+            }
+            document.getElementById('stars').textContent = stars;
+        }
+
+        // Module 8: Quiz - Large varied question bank
+        const quizBank = [
+            // Compatibility questions
+            { q: { en: "Can Type O give blood to Type AB?", fr: "Le type O peut-il donner du sang au type AB ?" }, a: true, type: 'compat' },
+            { q: { en: "Can Type A give blood to Type B?", fr: "Le type A peut-il donner du sang au type B ?" }, a: false, type: 'compat' },
+            { q: { en: "Can Type AB receive from anyone?", fr: "Le type AB peut-il recevoir de n'importe qui ?" }, a: true, type: 'compat' },
+            { q: { en: "Can Type B give to Type AB?", fr: "Le type B peut-il donner au type AB ?" }, a: true, type: 'compat' },
+            { q: { en: "Can Type A receive from Type O?", fr: "Le type A peut-il recevoir du type O ?" }, a: true, type: 'compat' },
+            { q: { en: "Can Type O receive from Type A?", fr: "Le type O peut-il recevoir du type A ?" }, a: false, type: 'compat' },
+            { q: { en: "Can Rh- give to Rh+?", fr: "Rh- peut-il donner à Rh+ ?" }, a: true, type: 'compat' },
+            { q: { en: "Can Rh+ give to Rh-?", fr: "Rh+ peut-il donner à Rh- ?" }, a: false, type: 'compat' },
+            { q: { en: "Can Type AB give to Type O?", fr: "Le type AB peut-il donner au type O ?" }, a: false, type: 'compat' },
+            { q: { en: "Can Type O give to anyone?", fr: "Le type O peut-il donner à n'importe qui ?" }, a: true, type: 'compat' },
+            // Cell function questions
+            { q: { en: "Do red blood cells carry oxygen?", fr: "Les globules rouges transportent-ils de l'oxygène ?" }, a: true, type: 'cells' },
+            { q: { en: "Do platelets fight germs?", fr: "Les plaquettes combattent-elles les microbes ?" }, a: false, type: 'cells' },
+            { q: { en: "Do white blood cells defend against viruses?", fr: "Les globules blancs défendent-ils contre les virus ?" }, a: true, type: 'cells' },
+            { q: { en: "Do red blood cells form scabs?", fr: "Les globules rouges forment-ils des croûtes ?" }, a: false, type: 'cells' },
+            { q: { en: "Do platelets repair cuts?", fr: "Les plaquettes réparent-elles les coupures ?" }, a: true, type: 'cells' },
+            // Facts questions
+            { q: { en: "Is Type O the most common blood type?", fr: "Le type O est-il le groupe sanguin le plus commun ?" }, a: true, type: 'facts' },
+            { q: { en: "Is Type AB the rarest blood type?", fr: "Le type AB est-il le groupe sanguin le plus rare ?" }, a: true, type: 'facts' },
+            { q: { en: "Do we have about 5 liters of blood?", fr: "Avons-nous environ 5 litres de sang ?" }, a: true, type: 'facts' },
+            { q: { en: "Does blood make up 10% of body weight?", fr: "Le sang représente-t-il 10% du poids corporel ?" }, a: false, type: 'facts' },
+            { q: { en: "Are platelets smaller than red blood cells?", fr: "Les plaquettes sont-elles plus petites que les globules rouges ?" }, a: true, type: 'facts' },
+            { q: { en: "Is bone marrow where blood is made?", fr: "La moelle osseuse est-elle l'endroit où le sang est fabriqué ?" }, a: true, type: 'facts' },
+            { q: { en: "Can blood type change during your life?", fr: "Le groupe sanguin peut-il changer au cours de la vie ?" }, a: false, type: 'facts' },
+            { q: { en: "Is Type O the universal donor?", fr: "Le type O est-il le donneur universel ?" }, a: true, type: 'facts' }
+        ];
+        
+        let currentQuiz = null;
+        let usedQuestions = [];
+        let quizStreak = 0;
+
+        function getRandomQuestion() {
+            // Reset if all questions used
+            if (usedQuestions.length >= quizBank.length) {
+                usedQuestions = [];
+            }
+            
+            let available = quizBank.filter((q, idx) => !usedQuestions.includes(idx));
+            let question = available[Math.floor(Math.random() * available.length)];
+            usedQuestions.push(quizBank.indexOf(question));
+            return question;
+        }
+
+        function checkQuiz(answer) {
+            if (!currentQuiz) currentQuiz = getRandomQuestion();
+            
+            const correct = currentQuiz.a;
+            const result = document.getElementById('quizResult');
+            
+            if (answer === correct) {
+                quizStreak++;
+                let bonus = quizStreak >= 3 ? 10 : 5;
+                stars += bonus;
+                document.getElementById('stars').textContent = stars;
+                
+                let msg = '✅ ' + (currentLang === 'en' ? 'Correct! +' : 'Correct ! +') + bonus + ' stars!';
+                if (quizStreak >= 3) msg += ' 🔥 x' + quizStreak;
+                result.innerHTML = msg;
+                
+                currentQuiz = null;
+                setTimeout(() => nextQuiz(), 1500);
+            } else {
+                quizStreak = 0;
+                result.innerHTML = '❌ ' + (currentLang === 'en' ? 'Try again! (Streak reset)' : 'Réessaie ! (Série perdue)');
+            }
+        }
+
+        function nextQuiz() {
+            currentQuiz = getRandomQuestion();
+            document.getElementById('quizQuestion').textContent = currentQuiz.q[currentLang];
+            document.getElementById('quizResult').innerHTML = '';
+        }
+
+        // Module 9: Hospital
+        function initHospital() {
+            const types = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+            const patient = types[Math.floor(Math.random() * types.length)];
+            document.getElementById('hospitalPatient').textContent = patient;
+            
+            const bank = document.getElementById('bloodBank');
+            bank.innerHTML = '';
+            
+            types.forEach(type => {
+                const bag = document.createElement('button');
+                bag.className = 'btn';
+                bag.style.cssText = 'background: white; color: #333;';
+                bag.innerHTML = '🩸 ' + type;
+                bag.onclick = () => selectBlood(type, patient, bag);
+                bank.appendChild(bag);
+            });
+            
+            document.getElementById('hospitalResult').innerHTML = '';
+        }
+
+        function selectBlood(type, patient, btn) {
+            const result = document.getElementById('hospitalResult');
+            if (isCompatible(type, patient)) {
+                btn.style.background = '#4caf50';
+                btn.style.color = 'white';
+                result.innerHTML = '🎉 ' + (currentLang === 'en' ? 'You saved the patient! +15 stars!' : 'Tu as sauvé le patient ! +15 étoiles !');
+                stars += 15;
+                document.getElementById('stars').textContent = stars;
+                showAchievement('Life Saver!');
+            } else {
+                btn.style.background = '#f44336';
+                btn.style.color = 'white';
+                result.innerHTML = '❌ ' + (currentLang === 'en' ? 'Wrong type! Try again!' : 'Mauvais type ! Réessaie !');
+            }
+        }
+
+        function newPatient() {
+            initHospital();
+        }
+
+        // Module 11: Inheritance
+        function calculateInheritance() {
+            const p1 = document.getElementById('parent1').value;
+            const p2 = document.getElementById('parent2').value;
+            const result = document.getElementById('inheritanceResult');
+            
+            const possibilities = getPossibleTypes(p1, p2);
+            
+            result.style.display = 'block';
+            result.innerHTML = '<strong>' + (currentLang === 'en' ? 'Possible blood types for child:' : 'Groupes sanguins possibles pour l\'enfant :') + '</strong><br>' +
+                '<span style="font-size: 1.5rem; color: #7b1fa2;">' + possibilities.join(', ') + '</span>';
+        }
+
+        function getPossibleTypes(p1, p2) {
+            const combos = {
+                'A,A': ['A', 'O'], 'A,B': ['A', 'B', 'AB', 'O'], 'A,AB': ['A', 'B', 'AB'], 'A,O': ['A', 'O'],
+                'B,A': ['A', 'B', 'AB', 'O'], 'B,B': ['B', 'O'], 'B,AB': ['A', 'B', 'AB'], 'B,O': ['B', 'O'],
+                'AB,A': ['A', 'B', 'AB'], 'AB,B': ['A', 'B', 'AB'], 'AB,AB': ['A', 'B', 'AB'], 'AB,O': ['A', 'B'],
+                'O,A': ['A', 'O'], 'O,B': ['B', 'O'], 'O,AB': ['A', 'B'], 'O,O': ['O']
+            };
+            return combos[p1 + ',' + p2] || ['A', 'B', 'AB', 'O'];
+        }
+
+        // Module 12: Final Challenge - 3 Stage Exam
+        let currentChallenge = 1;
+        let finalPatients = [];
+        let finalSelections = {};
+        let selectedPatient = null;
+        
+        const finalCellQuestions = [
+            { q: { en: 'Which cell DELIVERS OXYGEN?', fr: 'Quelle cellule LIVRE DE L\'OXYGÈNE ?' }, a: 'red' },
+            { q: { en: 'Which cell FIGHTS GERMS?', fr: 'Quelle cellule COMBAT LES MICROBES ?' }, a: 'white' },
+            { q: { en: 'Which cell REPAIRS CUTS?', fr: 'Quelle cellule RÉPARE LES COUPURES ?' }, a: 'platelet' }
+        ];
+        let currentCellQuestion = 0;
+        
+        const finalCompatQuestions = [
+            { q: { en: 'Can Type O give to Type A?', fr: 'O peut-il donner à A ?' }, a: true },
+            { q: { en: 'Can Type AB give to Type O?', fr: 'AB peut-il donner à O ?' }, a: false },
+            { q: { en: 'Can Rh- give to Rh+?', fr: 'Rh- peut-il donner à Rh+ ?' }, a: true }
+        ];
+        let currentCompatQuestion = 0;
+
+        function initFinalChallenge() {
+            currentChallenge = 1;
+            currentCellQuestion = Math.floor(Math.random() * 3);
+            currentCompatQuestion = 0;
+            
+            document.getElementById('challenge1').style.display = 'block';
+            document.getElementById('challenge2').style.display = 'none';
+            document.getElementById('challenge3').style.display = 'none';
+            document.getElementById('nextChallengeBtn').style.display = 'none';
+            
+            updateChallengeIndicators();
+            
+            document.getElementById('challenge1Question').textContent = finalCellQuestions[currentCellQuestion].q[currentLang];
+            document.getElementById('challenge1Result').innerHTML = '';
+            document.getElementById('challenge2Result').innerHTML = '';
+            document.getElementById('challenge2Progress').textContent = 'Progress: 0/3';
+            document.getElementById('compatQuestion').textContent = finalCompatQuestions[0].q[currentLang];
+            
+            const types = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+            finalPatients = [];
+            finalSelections = {};
+            selectedPatient = null;
+            
+            for (let i = 0; i < 3; i++) {
+                finalPatients.push(types[Math.floor(Math.random() * types.length)]);
+            }
+            renderFinalPatients();
+            renderFinalBloodBank();
+            document.getElementById('finalResult').innerHTML = '';
+        }
+        
+        function updateChallengeIndicators() {
+            const colors = { active: '#e53935', done: '#4caf50', pending: '#ccc' };
+            const textColors = { active: 'white', done: 'white', pending: '#666' };
+            
+            for (let i = 1; i <= 3; i++) {
+                const indicator = document.getElementById('challenge' + i + 'Indicator');
+                if (i < currentChallenge) {
+                    indicator.style.background = colors.done;
+                    indicator.style.color = textColors.done;
+                } else if (i === currentChallenge) {
+                    indicator.style.background = colors.active;
+                    indicator.style.color = textColors.active;
+                } else {
+                    indicator.style.background = colors.pending;
+                    indicator.style.color = textColors.pending;
+                }
+            }
+        }
+        
+        function checkFinalQuiz(challenge, answer, el) {
+            if (challenge === 1) {
+                const correct = finalCellQuestions[currentCellQuestion].a;
+                if (answer === correct) {
+                    el.style.background = '#c8e6c9';
+                    document.getElementById('challenge1Result').innerHTML = '✅ ' + (currentLang === 'en' ? 'Correct! Challenge complete!' : 'Correct ! Défi complété !');
+                    document.getElementById('nextChallengeBtn').style.display = 'inline-block';
+                    stars += 20;
+                    document.getElementById('stars').textContent = stars;
+                } else {
+                    el.style.background = '#ffcdd2';
+                    document.getElementById('challenge1Result').innerHTML = '❌ ' + (currentLang === 'en' ? 'Try again!' : 'Réessaie !');
+                    setTimeout(() => el.style.background = 'white', 1000);
+                }
+            }
+        }
+        
+        function checkCompatAnswer(answer) {
+            const correct = finalCompatQuestions[currentCompatQuestion].a;
+            if (answer === correct) {
+                currentCompatQuestion++;
+                if (currentCompatQuestion >= 3) {
+                    document.getElementById('challenge2Result').innerHTML = '🎉 ' + (currentLang === 'en' ? 'All correct! Challenge complete!' : 'Tout correct ! Défi complété !');
+                    document.getElementById('nextChallengeBtn').style.display = 'inline-block';
+                    stars += 20;
+                    document.getElementById('stars').textContent = stars;
+                } else {
+                    document.getElementById('challenge2Progress').textContent = 'Progress: ' + currentCompatQuestion + '/3';
+                    document.getElementById('compatQuestion').textContent = finalCompatQuestions[currentCompatQuestion].q[currentLang];
+                    document.getElementById('challenge2Result').innerHTML = '✅ ' + (currentLang === 'en' ? 'Correct! Next question...' : 'Correct ! Prochaine question...');
+                    stars += 5;
+                    document.getElementById('stars').textContent = stars;
+                }
+            } else {
+                document.getElementById('challenge2Result').innerHTML = '❌ ' + (currentLang === 'en' ? 'Wrong! Try again!' : 'Faux ! Réessaie !');
+            }
+        }
+        
+        function nextFinalChallenge() {
+            document.getElementById('challenge' + currentChallenge).style.display = 'none';
+            currentChallenge++;
+            document.getElementById('challenge' + currentChallenge).style.display = 'block';
+            document.getElementById('nextChallengeBtn').style.display = 'none';
+            updateChallengeIndicators();
+        }
+        
+        function renderFinalPatients() {
+            const container = document.getElementById('finalPatients');
+            container.innerHTML = finalPatients.map((type, i) => {
+                const isSelected = selectedPatient === i;
+                const isAssigned = finalSelections[i] !== undefined;
+                const assignedBlood = finalSelections[i];
+                
+                return `
+                    <div onclick="selectFinalPatient(${i})" 
+                         style="background: ${isSelected ? '#c8e6c9' : (isAssigned ? '#e8f5e9' : 'white')}; 
+                                color: #333; padding: 15px; border-radius: 12px; cursor: pointer; 
+                                border: ${isSelected ? '3px solid #4caf50' : (isAssigned ? '2px solid #4caf50' : '2px solid transparent')}; ">
+                        <div style="font-size: 2.5rem;">${isAssigned ? '😊' : '😰'}</div>
+                        <div style="font-weight: 700; margin: 8px 0;">Patient ${i + 1} ${isSelected ? '👈' : ''}</div>
+                        <div style="font-size: 1.3rem; font-weight: 900; color: #e53935; background: #f5f5f5; padding: 8px; border-radius: 6px;">${type}</div>
+                        <div style="margin-top: 8px; font-weight: 700; color: ${isAssigned ? '#4caf50' : '#666'}; font-size: 0.9rem;">
+                            ${isAssigned ? (currentLang === 'en' ? '✅ ' : '✅ ') + assignedBlood : (currentLang === 'en' ? '⚠️ Click!' : '⚠️ Clique !')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderFinalBloodBank() {
+            const bank = document.getElementById('finalBloodBank');
+            const types = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+            bank.innerHTML = '';
+            
+            types.forEach(type => {
+                const bag = document.createElement('button');
+                bag.className = 'btn';
+                bag.style.cssText = 'background: white; color: #333; padding: 10px 20px; font-weight: 700; font-size: 0.9rem;';
+                bag.innerHTML = '🩸 ' + type;
+                bag.onclick = () => assignFinalBlood(type);
+                bag.disabled = selectedPatient === null;
+                bag.style.opacity = selectedPatient === null ? '0.5' : '1';
+                bank.appendChild(bag);
+            });
+        }
+
+        function selectFinalPatient(idx) {
+            selectedPatient = idx;
+            renderFinalPatients();
+            renderFinalBloodBank();
+        }
+
+        function assignFinalBlood(bloodType) {
+            if (selectedPatient === null) return;
+            
+            finalSelections[selectedPatient] = bloodType;
+            selectedPatient = null;
+            renderFinalPatients();
+            renderFinalBloodBank();
+            
+            if (Object.keys(finalSelections).length === 3) {
+                checkFinalChallenge();
+            }
+        }
+
+        function checkFinalChallenge() {
+            let allCorrect = true;
+            let wrongPatients = [];
+            
+            for (let i = 0; i < 3; i++) {
+                if (!isCompatible(finalSelections[i], finalPatients[i])) {
+                    allCorrect = false;
+                    wrongPatients.push(i + 1);
+                }
+            }
+            
+            if (allCorrect) {
+                document.getElementById('finalResult').innerHTML = '🎉 ' + (currentLang === 'en' ? 'PERFECT! All patients saved! +30 stars!' : 'PARFAIT ! Tous les patients sauvés ! +30 étoiles !');
+                stars += 30;
+                document.getElementById('stars').textContent = stars;
+                showAchievement('Blood Master!');
+                setTimeout(showCertificate, 2000);
+            } else {
+                document.getElementById('finalResult').innerHTML = '❌ ' + (currentLang === 'en' ? 'Patient(s) ' : 'Patient(s) ') + wrongPatients.join(', ') + (currentLang === 'en' ? ' wrong! Try again!' : ' faux ! Réessaie !');
+                finalSelections = {};
+                selectedPatient = null;
+                renderFinalPatients();
+                renderFinalBloodBank();
+            }
+        }
+
+        // Override showSection to initialize games
+        const originalShowSection = showSection;
+        showSection = function(index) {
+            originalShowSection(index);
+            if (index === 4) initKeysGame();
+            if (index === 8) initHospital();
+            if (index === 11) initFinalChallenge();
+        };
+
+        // Register Service Worker for PWA support
+        console.log('[App] Checking Service Worker support...');
+        console.log('[App] Protocol:', window.location.protocol);
+        console.log('[App] Host:', window.location.host);
+        console.log('[App] serviceWorker in navigator:', 'serviceWorker' in navigator);
+        
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js', { scope: './' }).then((registration) => {
+                console.log('[App] Service Worker registered:', registration.scope);
+                
+                // Check if there's a new service worker waiting
+                if (registration.installing) {
+                    console.log('[App] Service Worker installing...');
+                }
+                if (registration.waiting) {
+                    console.log('[App] Service Worker waiting, activating...');
+                    registration.waiting.postMessage('skipWaiting');
+                }
+                
+                // Handle new service workers
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    console.log('[App] Update found, new worker installing...');
+                    
+                    newWorker.addEventListener('statechange', () => {
+                        console.log('[App] Worker state:', newWorker.state);
+                        if (newWorker.state === 'installed') {
+                            if (navigator.serviceWorker.controller) {
+                                console.log('[App] New worker ready, activating...');
+                                newWorker.postMessage('skipWaiting');
+                            } else {
+                                console.log('[App] First install complete');
+                            }
+                        }
+                    });
+                });
+                
+                // Verify cache is ready
+                if ('caches' in window) {
+                    caches.open('blood-academy-v6').then((cache) => {
+                        cache.keys().then((keys) => {
+                            console.log('[App] Cached URLs:', keys.map(k => k.url));
+                        });
+                    });
+                }
+            }).catch((err) => {
+                console.error('[App] Service Worker registration failed:', err);
+            });
+            
+            // Reload when a new service worker takes over
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                console.log('[App] Controller changed, reloading...');
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
+            });
+        } else {
+            console.log('[App] Service Workers not supported');
+            console.log('[App] Possible reasons:');
+            console.log('  - Private/Incognito browsing mode');
+            console.log('  - Not HTTPS (required for non-localhost)');
+            console.log('  - Old browser version');
+            
+            // Show a warning to the user
+            const isHTTPS = window.location.protocol === 'https:';
+            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            
+            if (!isHTTPS && !isLocalhost) {
+                console.warn('[App] WARNING: Service Workers require HTTPS. Offline mode will not work.');
+            }
+        }
+    </script>
+</body>
+</html>
