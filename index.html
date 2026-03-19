@@ -1514,15 +1514,46 @@
                 tooltipEl.textContent = labelObj[currentLang];
             };
             
-            cell.onmouseenter = () => {
+            // Show tooltip
+            const showTooltip = () => {
                 cell.style.transform = 'scale(1.5)';
                 cell.style.zIndex = '100';
                 tooltipEl.style.opacity = '1';
             };
-            cell.onmouseleave = () => {
+            
+            // Hide tooltip
+            const hideTooltip = () => {
                 cell.style.transform = 'scale(1)';
                 cell.style.zIndex = zIndex;
                 tooltipEl.style.opacity = '0';
+            };
+            
+            // Mouse events (desktop)
+            cell.onmouseenter = showTooltip;
+            cell.onmouseleave = hideTooltip;
+            
+            // Touch events (mobile/tablet)
+            cell.ontouchstart = (e) => {
+                e.preventDefault(); // Prevent scrolling
+                showTooltip();
+            };
+            cell.ontouchend = (e) => {
+                e.preventDefault();
+                hideTooltip();
+            };
+            
+            // Click event for tapping (alternative)
+            let isShowing = false;
+            cell.onclick = (e) => {
+                // Don't toggle if it was a touch event (handled above)
+                if (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents) return;
+                
+                isShowing = !isShowing;
+                if (isShowing) {
+                    showTooltip();
+                } else {
+                    hideTooltip();
+                }
             };
             
             return cell;
